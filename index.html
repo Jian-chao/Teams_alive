@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusFlow — 專注力與工作區協同中心 (Workspace Productivity Hub v2.4)</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.78);
+      --bg-card-hover: rgba(31, 41, 55, 0.85);
+      --bg-input: rgba(15, 23, 42, 0.85);
+      --bg-code: #090d16;
+      --border-glass: rgba(255, 255, 255, 0.09);
+      --border-highlight: rgba(99, 102, 241, 0.45);
+      --text-main: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-primary: #6366f1;
+      --accent-primary-hover: #4f46e5;
+      --accent-secondary: #8b5cf6;
+      --status-green: #10b981;
+      --status-green-bg: rgba(16, 185, 129, 0.14);
+      --status-amber: #f59e0b;
+      --status-amber-bg: rgba(245, 158, 11, 0.14);
+      --shadow-card: 0 12px 32px -8px rgba(0, 0, 0, 0.45);
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+      --font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", ui-monospace, monospace;
+    }
+
+    html[data-theme="light"] {
+      --bg-primary: #f1f5f9;
+      --bg-secondary: #e2e8f0;
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --bg-card-hover: rgba(255, 255, 255, 0.96);
+      --bg-input: rgba(248, 250, 252, 0.95);
+      --bg-code: #0f172a;
+      --border-glass: rgba(15, 23, 42, 0.1);
+      --border-highlight: rgba(79, 70, 229, 0.4);
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent-primary: #4f46e5;
+      --accent-primary-hover: #4338ca;
+      --accent-secondary: #7c3aed;
+      --status-green: #059669;
+      --status-green-bg: rgba(5, 150, 105, 0.12);
+      --status-amber: #d97706;
+      --status-amber-bg: rgba(217, 119, 6, 0.12);
+      --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(99, 102, 241, 0.14), transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.1), transparent 28%),
+        radial-gradient(circle at 50% 85%, rgba(139, 92, 246, 0.1), transparent 36%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .app-shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px 22px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header Bar */
+    .top-header {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--status-green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.5px;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+
+    .brand-titles h1 {
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .version-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.16);
+      color: var(--accent-primary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      font-weight: 600;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .hardware-pills {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hw-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--bg-input);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .hw-pill:hover {
+      border-color: var(--border-highlight);
+      color: var(--text-main);
+    }
+
+    .hw-pill.active {
+      background: var(--status-green-bg);
+      border-color: rgba(16, 185, 129, 0.45);
+      color: var(--status-green);
+    }
+
+    .hw-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all 0.25s ease;
+    }
+
+    .hw-pill.active .hw-dot {
+      background: var(--status-green);
+      box-shadow: 0 0 8px var(--status-green);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 15px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-input);
+      color: var(--text-main);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-master {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: #ffffff;
+      border: none;
+      padding: 9px 18px;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-master:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-master.synced {
+      background: linear-gradient(135deg, #059669, #10b981);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-primary-hover);
+    }
+
+    .btn-emerald {
+      background: rgba(16, 185, 129, 0.16);
+      color: var(--status-green);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-emerald:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    /* 3-Column Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr 430px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1240px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .col-telemetry {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .col-telemetry {
+        grid-column: span 1;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .col-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-block-end: 12px;
+      border-block-end: 1px solid var(--border-glass);
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-glass);
+      color: var(--text-secondary);
+    }
+
+    .badge-green {
+      background: var(--status-green-bg);
+      color: var(--status-green);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    /* Left Column: Pomodoro Focus Timer */
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--bg-input);
+      padding: 5px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+    }
+
+    .mode-tab {
+      padding: 7px 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab.active {
+      background: var(--accent-primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+    }
+
+    .timer-ring-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 4px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timer-svg {
+      width: 220px;
+      height: 220px;
+      transform: rotate(-90deg);
+    }
+
+    .timer-track {
+      fill: none;
+      stroke: var(--border-glass);
+      stroke-width: 10;
+    }
+
+    .timer-progress {
+      fill: none;
+      stroke: url(#ffRingGrad);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 596.9;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .timer-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .timer-digits {
+      font-family: var(--font-mono);
+      font-size: 2.65rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.05;
+    }
+
+    .timer-mode-label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-block-start: 4px;
+    }
+
+    .timer-controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .custom-time-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-block-start: 6px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .input-sm {
+      width: 74px;
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-input);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    .pip-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pip-preview-wrap {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border-glass);
+      background: #070b14;
+      aspect-ratio: 16 / 9;
+      max-height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #ff-pip-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    #ff-pip-video {
+      position: fixed;
+      width: 2px;
+      height: 2px;
+      opacity: 0.01;
+      pointer-events: none;
+      inset: auto 0 0 auto;
+    }
+
+    .pip-desc {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Center Column: Tasks & Notes */
+    .task-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .text-input {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-input);
+      color: var(--text-main);
+      font-size: 0.86rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .text-input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 270px;
+      overflow-y: auto;
+      padding-inline-end: 2px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      border: 1px solid var(--border-glass);
+      transition: border-color 0.2s ease;
+    }
+
+    .task-item:hover {
+      border-color: var(--border-highlight);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .task-checkbox {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--status-green);
+      cursor: pointer;
+    }
+
+    .task-text {
+      font-size: 0.86rem;
+      word-break: break-word;
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-del {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .task-del:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .notes-area {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-input);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      line-height: 1.55;
+      outline: none;
+    }
+
+    .notes-area:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .notes-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    /* Right Column: Telemetry Diagnostics & Cross-Tab Sync */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .metric-tile {
+      background: var(--bg-input);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      padding: 11px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .metric-sub {
+      font-size: 0.68rem;
+      color: var(--status-green);
+      font-family: var(--font-mono);
+    }
+
+    .telemetry-log-bar {
+      background: var(--bg-code);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-sm);
+      padding: 8px 11px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: #a7f3d0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .steps-banner {
+      background: rgba(16, 185, 129, 0.09);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+
+    .steps-banner.flash {
+      background: rgba(16, 185, 129, 0.22);
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.3);
+    }
+
+    .steps-banner-title {
+      font-weight: 700;
+      color: var(--status-green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .steps-list {
+      padding-inline-start: 18px;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .steps-list code {
+      font-family: var(--font-mono);
+      background: rgba(0, 0, 0, 0.28);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #6ee7b7;
+      font-size: 0.76rem;
+    }
+
+    .bookmarklet-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(139, 92, 246, 0.14);
+      border: 1px dashed rgba(139, 92, 246, 0.55);
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: grab;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .bookmarklet-pill:hover {
+      background: rgba(139, 92, 246, 0.24);
+      border-style: solid;
+    }
+
+    details.code-drawer {
+      background: var(--bg-input);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    details.code-drawer summary {
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    details.code-drawer summary:hover {
+      color: var(--text-main);
+    }
+
+    .code-drawer-body {
+      padding: 10px 12px 12px;
+      border-block-start: 1px solid var(--border-glass);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .code-pre {
+      background: var(--bg-code);
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.45;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      max-height: 190px;
+      overflow: auto;
+      white-space: pre;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer-bar {
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      padding-block-start: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header Bar -->
+    <header class="top-header">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">FF</div>
+        <div class="brand-titles">
+          <h1>
+            FocusFlow Workspace Hub
+            <span class="version-badge">v2.4</span>
+          </h1>
+          <div class="brand-subtitle">專注力與工作區協同中心 — 高解析度視口連續性與番茄鐘工作台</div>
+        </div>
+      </div>
+
+      <!-- 3 Live Hardware Status Pills -->
+      <div class="hardware-pills" role="group" aria-label="硬體協同狀態指標">
+        <button type="button" id="pill-wakelock" class="hw-pill" title="點擊切換螢幕常亮鎖定 (Screen Wake Lock API)">
+          <span class="hw-dot"></span>
+          <span>螢幕常亮協同 (Display Lock): <strong id="state-wakelock">待機</strong></span>
+        </button>
+
+        <button type="button" id="pill-pip" class="hw-pill" title="點擊切換子母畫面浮動小窗 (Picture-in-Picture)">
+          <span class="hw-dot"></span>
+          <span>浮動視窗引擎 (PiP Engine): <strong id="state-pip">待機</strong></span>
+        </button>
+
+        <button type="button" id="pill-audio" class="hw-pill" title="點擊切換 1Hz 無聲背景音訊時鐘 (Audio Clock)">
+          <span class="hw-dot"></span>
+          <span>音訊時鐘基準 (Audio Clock): <strong id="state-audio">待機</strong></span>
+        </button>
+      </div>
+
+      <!-- Theme Switcher & Master Sync Button -->
+      <div class="header-actions">
+        <button type="button" id="btn-theme-toggle" class="btn" title="切換深色 / 淺色外觀主題">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-label">深色模式</span>
+        </button>
+
+        <button type="button" id="btn-activate-full-sync" class="btn btn-master">
+          <span>⚡ 一鍵啟動全時協同 (Activate Full Sync)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main 3-Column Grid -->
+    <main class="dashboard-grid">
+      <!-- LEFT COLUMN: Pomodoro Focus Timer & PiP Mini Monitor -->
+      <section class="card" aria-label="番茄鐘專注計時與浮動視窗引擎">
+        <div class="card-header">
+          <div class="card-title">⏱️ 專注力番茄鐘與浮動小窗</div>
+          <span class="badge badge-green" id="pomo-cycle-badge">循環 #1</span>
+        </div>
+
+        <div class="mode-tabs" role="tablist">
+          <button type="button" class="mode-tab active" data-minutes="25" data-label="專注衝刺 (25:00 Focus)">25:00 專注</button>
+          <button type="button" class="mode-tab" data-minutes="5" data-label="短暫休息 (05:00 Short Break)">05:00 短休</button>
+          <button type="button" class="mode-tab" data-minutes="15" data-label="深度恢復 (15:00 Long Break)">15:00 長休</button>
+        </div>
+
+        <!-- Interactive SVG Circular Progress Ring -->
+        <div class="timer-ring-wrap">
+          <svg class="timer-svg" viewBox="0 0 220 220">
+            <defs>
+              <linearGradient id="ffRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#10b981" />
+              </linearGradient>
+            </defs>
+            <circle class="timer-track" cx="110" cy="110" r="95"></circle>
+            <circle id="timer-ring-circle" class="timer-progress" cx="110" cy="110" r="95"></circle>
+          </svg>
+          <div class="timer-center">
+            <div id="timer-display" class="timer-digits">25:00</div>
+            <div id="timer-mode-text" class="timer-mode-label">專注衝刺 (25:00 Focus)</div>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <button type="button" id="btn-timer-start" class="btn btn-primary">▶ 開始專注計時</button>
+          <button type="button" id="btn-timer-reset" class="btn" title="重置計時器">↺ 重置</button>
+        </div>
+
+        <div class="custom-time-row">
+          <label for="input-custom-min">自訂專注時長 (分鐘):</label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="number" id="input-custom-min" class="input-sm" min="1" max="180" value="25" />
+            <button type="button" id="btn-custom-apply" class="btn" style="padding:5px 10px; font-size:0.78rem;">套用</button>
+          </div>
+        </div>
+
+        <!-- PiP Mini Floating Monitor Section -->
+        <div class="pip-box">
+          <button type="button" id="btn-open-pip" class="btn btn-emerald" style="width:100%; padding:10px 14px;">
+            🖼️ 開啟浮動小窗模式 (Mini Floating Timer / PiP)
+          </button>
+          <div class="pip-preview-wrap" title="即時 2 FPS 子母畫面渲染緩衝區預覽">
+            <canvas id="ff-pip-canvas" width="360" height="200"></canvas>
+            <video id="ff-pip-video" muted playsinline autoplay></video>
+          </div>
+          <p class="pip-desc">
+            將計時器彈出為獨立置頂小窗後，作業系統與瀏覽器會將此工作階段視為前景活躍媒體視窗，維持高優先級排程與渲染連續性。
+          </p>
+        </div>
+      </section>
+
+      <!-- CENTER COLUMN: Persistent Tasks & Quick Markdown Scratchpad -->
+      <div class="col-stack">
+        <!-- Persistent Tasks Card -->
+        <section class="card" aria-label="今日專注任務清單">
+          <div class="card-header">
+            <div class="card-title">✅ 工作區待辦事項 (Workspace Tasks)</div>
+            <span id="task-stats-badge" class="badge">0 / 0 完成</span>
+          </div>
+
+          <div class="task-input-row">
+            <input
+              type="text"
+              id="input-new-task"
+              class="text-input"
+              placeholder="輸入待辦事項後按 Enter 新增..."
+              aria-label="新增待辦任務"
+            />
+            <button type="button" id="btn-add-task" class="btn btn-primary">+ 新增</button>
+          </div>
+
+          <ul id="task-list-ul" class="task-list"></ul>
+        </section>
+
+        <!-- Quick Markdown Scratchpad Card -->
+        <section class="card" aria-label="快速 Markdown 隨手記">
+          <div class="card-header">
+            <div class="card-title">📝 快速隨手記 (Quick Markdown Scratchpad)</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" id="btn-insert-time" class="btn" style="padding:4px 9px; font-size:0.75rem;">+ 時間戳記</button>
+              <span id="notes-save-badge" class="badge badge-green">✓ 已自動儲存 (Saved)</span>
+            </div>
+          </div>
+
+          <textarea
+            id="textarea-scratchpad"
+            class="notes-area"
+            placeholder="# 會議記錄與工作區備忘錄&#10;- 在此輸入 Markdown 筆記，系統將即時儲存於本機 localStorage..."
+          ></textarea>
+
+          <div class="notes-footer">
+            <span id="notes-char-count">0 字元 | 1 行</span>
+            <span>儲存位置: <code>localStorage (ff_workspace_notes)</code></span>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: Telemetry Diagnostics & Cross-Tab Sync Utility -->
+      <div class="col-stack col-telemetry">
+        <!-- Live Telemetry Diagnostics Card -->
+        <section class="card" aria-label="視口連續性遙測診斷面板">
+          <div class="card-header">
+            <div class="card-title">📡 視口連續性與遙測診斷 (Telemetry Diagnostics)</div>
+            <span class="badge badge-green">38s–115s Normal Dist</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-tile">
+              <span class="metric-label">工作階段運行時間</span>
+              <span id="metric-uptime" class="metric-value">00:00:00</span>
+              <span class="metric-sub">Session Uptime</span>
+            </div>
+
+            <div class="metric-tile">
+              <span class="metric-label">視口校準脈衝數</span>
+              <span id="metric-pulses" class="metric-value">0</span>
+              <span class="metric-sub">Calibration Pulses</span>
+            </div>
+
+            <div class="metric-tile">
+              <span class="metric-label">下次校準倒數</span>
+              <span id="metric-next-pulse" class="metric-value">--s</span>
+              <span class="metric-sub">Box-Muller Jitter</span>
+            </div>
+          </div>
+
+          <div id="telemetry-last-vector" class="telemetry-log-bar">
+            <span>⚡ 狀態：等待首次視口連續性校準脈衝...</span>
+          </div>
+
+          <button type="button" id="btn-calibrate-now" class="btn btn-emerald" style="width:100%;">
+            🎯 立即發送校準脈衝 (Calibrate Now)
+          </button>
+        </section>
+
+        <!-- Cross-Tab Sync Snippet Panel (Core B Distributor) -->
+        <section class="card" aria-label="跨分頁協同診斷模組">
+          <div class="card-header">
+            <div class="card-title">🔗 跨分頁協同診斷模組 (Console Sync Utility)</div>
+            <span class="badge">Core B Engine</span>
+          </div>
+
+          <p style="font-size:0.81rem; color:var(--text-secondary);">
+            瀏覽器基於安全沙盒隔離不同分頁。若需在企業外部通訊分頁或遠端桌面網頁啟用獨立視口連續性校準，請複製下方跨分頁協同腳本：
+          </p>
+
+          <button type="button" id="btn-copy-console-snippet" class="btn btn-master" style="width:100%; padding:11px 16px;">
+            📋 一鍵複製 Console 協同腳本 (Copy Console Sync Snippet)
+          </button>
+
+          <!-- 3 Simple Steps Banner -->
+          <div id="copy-steps-banner" class="steps-banner">
+            <div class="steps-banner-title">
+              <span id="copy-banner-heading">💡 跨分頁啟用 3 步驟指引：</span>
+              <span id="copy-status-pill" class="badge badge-green">準備就緒</span>
+            </div>
+            <ol class="steps-list">
+              <li>切換至目標工作分頁並按下 <code>F12</code> 開啟開發者工具 (DevTools)</li>
+              <li>點選 <code>Console</code> 分頁（首次貼上若提示請輸入 <code>allow pasting</code>）</li>
+              <li>貼上 (<code>Ctrl+V</code>) 並按 <code>Enter</code>，看到分頁標題出現 <code>· </code> 及右下角綠點即完成！</li>
+            </ol>
+          </div>
+
+          <!-- Secondary Bookmarklet Pill -->
+          <a
+            id="link-bookmarklet"
+            href="javascript:void(0)"
+            class="bookmarklet-pill"
+            title="按住滑鼠左鍵將此按鈕拖曳至瀏覽器書籤列，日後在目標分頁點擊書籤即可一鍵啟動！"
+          >
+            🔖 拖曳至書籤列：FocusFlow 同步書籤 (Bookmarklet)
+          </a>
+
+          <!-- Collapsible Code Viewer -->
+          <details class="code-drawer">
+            <summary>
+              <span>🔍 檢視 Core B 獨立協同腳本原始碼 (Telemetry Sync Source)</span>
+              <span>展開 ▾</span>
+            </summary>
+            <div class="code-drawer-body">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.74rem; color:var(--text-secondary);">
+                  停止指令：<code>window.__focusSync.stop()</code>
+                </span>
+                <button type="button" id="btn-copy-source-secondary" class="btn" style="padding:4px 10px; font-size:0.75rem;">
+                  📋 複製原始碼
+                </button>
+              </div>
+              <pre id="pre-core-b-source" class="code-pre"></pre>
+            </div>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer-bar">
+      FocusFlow Workspace Hub v2.4 · 零外部依賴單檔架構 (Zero-Dependency Single-File HTML5) · 本機隱私優先
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ==========================================================================
+       * 1. CORE B SELF-CONTAINED SNIPPET SOURCE (FOR CROSS-TAB & LOCAL ENGINE)
+       * ========================================================================== */
+      const CORE_B_SCRIPT_SOURCE = `(function () {
+  "use strict";
+  if (window.__focusSync && window.__focusSync.active) {
+    console.info("[FocusFlow] 視口連續性協同模組已在運行中，執行重新校準...");
+    window.__focusSync.pulse();
+    return window.__focusSync.status();
+  }
+
+  const state = {
+    active: true,
+    startedAt: Date.now(),
+    pulseCount: 0,
+    nextPulseInSec: 0,
+    timerId: null,
+    countdownId: null,
+    wakeLockSentinel: null,
+    audioCtx: null,
+    lastCoord: { x: Math.round(window.innerWidth * 0.48), y: Math.round(window.innerHeight * 0.48) },
+    cleanups: []
+  };
+
+  function bindViewportContinuity() {
+    const descHidden = Object.getOwnPropertyDescriptor(Document.prototype, "hidden");
+    const descVis = Object.getOwnPropertyDescriptor(Document.prototype, "visibilityState");
+    try {
+      Object.defineProperty(document, "hidden", {
+        configurable: true,
+        get: function () { return false; }
+      });
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: function () { return "visible"; }
+      });
+    } catch (_) {}
+
+    const hasFocusOrig = Document.prototype.hasFocus;
+    Document.prototype.hasFocus = function () { return true; };
+
+    const blockEvents = ["visibilitychange", "webkitvisibilitychange", "blur", "focusout", "pagehide", "freeze"];
+    const interceptHandler = function (ev) {
+      if (state.active) {
+        ev.stopImmediatePropagation();
+      }
+    };
+    blockEvents.forEach(function (evtName) {
+      window.addEventListener(evtName, interceptHandler, true);
+      document.addEventListener(evtName, interceptHandler, true);
+    });
+
+    state.cleanups.push(function () {
+      try {
+        if (descHidden) Object.defineProperty(document, "hidden", descHidden);
+        if (descVis) Object.defineProperty(document, "visibilityState", descVis);
+      } catch (_) {}
+      Document.prototype.hasFocus = hasFocusOrig;
+      blockEvents.forEach(function (evtName) {
+        window.removeEventListener(evtName, interceptHandler, true);
+        document.removeEventListener(evtName, interceptHandler, true);
+      });
+    });
+  }
+
+  function patchIdleObserver() {
+    if ("IdleDetector" in window) {
+      const OrigIdle = window.IdleDetector;
+      window.IdleDetector = function () {
+        return {
+          userState: "active",
+          screenState: "unlocked",
+          addEventListener: function () {},
+          removeEventListener: function () {},
+          start: function () { return Promise.resolve(); }
+        };
+      };
+      state.cleanups.push(function () {
+        window.IdleDetector = OrigIdle;
+      });
+    }
+  }
+
+  function sampleGaussianIntervalMs() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    const meanSec = 72;
+    const stdSec = 16;
+    const clampedSec = Math.min(115, Math.max(38, Math.round(meanSec + z * stdSec)));
+    return clampedSec * 1000;
+  }
+
+  function dispatchMicroCurve() {
+    if (!state.active) return;
+    const vw = Math.max(320, window.innerWidth || 1024);
+    const vh = Math.max(240, window.innerHeight || 768);
+    const targetX = Math.round(vw * (0.2 + Math.random() * 0.6));
+    const targetY = Math.round(vh * (0.2 + Math.random() * 0.6));
+    const steps = 3 + Math.floor(Math.random() * 3);
+    const startX = state.lastCoord.x;
+    const startY = state.lastCoord.y;
+
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const arc = Math.sin(t * Math.PI) * ((Math.random() - 0.5) * 14);
+      const cx = Math.round(startX + (targetX - startX) * t + arc);
+      const cy = Math.round(startY + (targetY - startY) * t - arc);
+      const el = document.elementFromPoint(cx, cy) || document.body || document.documentElement;
+      const evtInit = {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: cx,
+        clientY: cy,
+        screenX: cx + (window.screenX || 0),
+        screenY: cy + (window.screenY || 0),
+        movementX: cx - state.lastCoord.x,
+        movementY: cy - state.lastCoord.y,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true
+      };
+      if (typeof PointerEvent === "function") {
+        el.dispatchEvent(new PointerEvent("pointermove", evtInit));
+      }
+      el.dispatchEvent(new MouseEvent("mousemove", evtInit));
+      state.lastCoord = { x: cx, y: cy };
+    }
+
+    const activeTarget = document.elementFromPoint(state.lastCoord.x, state.lastCoord.y) || document.body;
+    const modifiers = [
+      { key: "Shift", code: "ShiftLeft", keyCode: 16 },
+      { key: "Control", code: "ControlLeft", keyCode: 17 },
+      { key: "ScrollLock", code: "ScrollLock", keyCode: 145 }
+    ];
+    const mod = modifiers[state.pulseCount % modifiers.length];
+    activeTarget.dispatchEvent(new KeyboardEvent("keydown", {
+      key: mod.key,
+      code: mod.code,
+      keyCode: mod.keyCode,
+      which: mod.keyCode,
+      bubbles: true,
+      cancelable: true
+    }));
+    activeTarget.dispatchEvent(new KeyboardEvent("keyup", {
+      key: mod.key,
+      code: mod.code,
+      keyCode: mod.keyCode,
+      which: mod.keyCode,
+      bubbles: true,
+      cancelable: true
+    }));
+
+    if (typeof WheelEvent === "function") {
+      activeTarget.dispatchEvent(new WheelEvent("wheel", {
+        deltaX: 0,
+        deltaY: (state.pulseCount % 2 === 0) ? 1 : -1,
+        bubbles: true,
+        cancelable: true
+      }));
+    }
+
+    window.dispatchEvent(new Event("focus"));
+    state.pulseCount += 1;
+    updateTelemetryBadge();
+  }
+
+  async function acquireHardwareLocks() {
+    if ("wakeLock" in navigator && !state.wakeLockSentinel) {
+      try {
+        state.wakeLockSentinel = await navigator.wakeLock.request("screen");
+        state.wakeLockSentinel.addEventListener("release", function () {
+          state.wakeLockSentinel = null;
+        });
+      } catch (_) {}
+    }
+    try {
+      const AudioCtor = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtor && !state.audioCtx) {
+        const ctx = new AudioCtor();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 1;
+        gain.gain.value = 0.00001;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        state.audioCtx = ctx;
+      } else if (state.audioCtx && state.audioCtx.state === "suspended") {
+        await state.audioCtx.resume();
+      }
+    } catch (_) {}
+  }
+
+  function mountTelemetryIndicator() {
+    if (!document.title.startsWith("· ")) {
+      document.title = "· " + document.title;
+    }
+    let dot = document.getElementById("ff-telemetry-dot");
+    if (!dot) {
+      dot = document.createElement("div");
+      dot.id = "ff-telemetry-dot";
+      dot.style.cssText = [
+        "position:fixed",
+        "inset:auto 14px 14px auto",
+        "z-index:2147483647",
+        "display:flex",
+        "align-items:center",
+        "gap:6px",
+        "padding:4px 10px",
+        "border-radius:999px",
+        "background:rgba(15,23,42,0.88)",
+        "border:1px solid rgba(16,185,129,0.5)",
+        "color:#10b981",
+        "font:600 11px/1.2 -apple-system,BlinkMacSystemFont,monospace",
+        "box-shadow:0 4px 12px rgba(0,0,0,0.35)",
+        "pointer-events:none",
+        "user-select:none"
+      ].join(";");
+      document.body.appendChild(dot);
+    }
+    updateTelemetryBadge();
+  }
+
+  function updateTelemetryBadge() {
+    const dot = document.getElementById("ff-telemetry-dot");
+    if (dot) {
+      dot.textContent = "● FocusFlow Sync #" + state.pulseCount + " (" + state.nextPulseInSec + "s)";
+    }
+  }
+
+  function scheduleNextPulse() {
+    if (!state.active) return;
+    clearTimeout(state.timerId);
+    clearInterval(state.countdownId);
+    const delayMs = sampleGaussianIntervalMs();
+    state.nextPulseInSec = Math.round(delayMs / 1000);
+    updateTelemetryBadge();
+
+    state.countdownId = setInterval(function () {
+      if (state.nextPulseInSec > 0) {
+        state.nextPulseInSec -= 1;
+        updateTelemetryBadge();
+      }
+    }, 1000);
+
+    state.timerId = setTimeout(function () {
+      dispatchMicroCurve();
+      acquireHardwareLocks();
+      scheduleNextPulse();
+    }, delayMs);
+  }
+
+  function stopSync() {
+    state.active = false;
+    clearTimeout(state.timerId);
+    clearInterval(state.countdownId);
+    state.cleanups.forEach(function (fn) {
+      try { fn(); } catch (_) {}
+    });
+    if (state.wakeLockSentinel) {
+      try { state.wakeLockSentinel.release(); } catch (_) {}
+      state.wakeLockSentinel = null;
+    }
+    if (state.audioCtx) {
+      try { state.audioCtx.close(); } catch (_) {}
+      state.audioCtx = null;
+    }
+    if (document.title.startsWith("· ")) {
+      document.title = document.title.slice(2);
+    }
+    const dot = document.getElementById("ff-telemetry-dot");
+    if (dot) dot.remove();
+    console.info("[FocusFlow] 視口連續性協同模組已停止。");
+  }
+
+  bindViewportContinuity();
+  patchIdleObserver();
+  acquireHardwareLocks();
+  mountTelemetryIndicator();
+  dispatchMicroCurve();
+  scheduleNextPulse();
+
+  document.addEventListener("visibilitychange", function () {
+    if (state.active && document.visibilityState === "visible") {
+      acquireHardwareLocks();
+    }
+  });
+
+  window.__focusSync = {
+    active: true,
+    pulse: function () {
+      dispatchMicroCurve();
+      scheduleNextPulse();
+      return this.status();
+    },
+    stop: stopSync,
+    status: function () {
+      return {
+        active: state.active,
+        pulseCount: state.pulseCount,
+        nextPulseInSec: state.nextPulseInSec,
+        uptimeSec: Math.round((Date.now() - state.startedAt) / 1000),
+        wakeLock: Boolean(state.wakeLockSentinel),
+        audioClock: Boolean(state.audioCtx && state.audioCtx.state === "running")
+      };
+    }
+  };
+
+  console.info("%c[FocusFlow v2.4] 跨分頁視口連續性協同模組已啟動", "color:#10b981;font-weight:bold;");
+  return window.__focusSync.status();
+})();`;
+
+      /* ==========================================================================
+       * 2. STATE & HARDWARE CONTROLLERS IN HUB (CORE A)
+       * ========================================================================== */
+      const hubState = {
+        startedAt: Date.now(),
+        pulseCount: 0,
+        nextPulseInSec: 64,
+        lastVectorText: "系統待命中 — 點擊上方「一鍵啟動全時協同」或「立即發送校準脈衝」",
+        wakeLockSentinel: null,
+        audioCtx: null,
+        pipActive: false,
+        pomoRunning: false,
+        pomoTotalSec: 25 * 60,
+        pomoRemainSec: 25 * 60,
+        pomoModeLabel: "專注衝刺 (25:00 Focus)",
+        pomoCycle: 1,
+        pomoIntervalId: null,
+        pulseTimeoutId: null,
+        lastCoord: { x: 420, y: 320 }
+      };
+
+      // DOM Elements
+      const elPillWake = document.getElementById("pill-wakelock");
+      const elStateWake = document.getElementById("state-wakelock");
+      const elPillPip = document.getElementById("pill-pip");
+      const elStatePip = document.getElementById("state-pip");
+      const elPillAudio = document.getElementById("pill-audio");
+      const elStateAudio = document.getElementById("state-audio");
+
+      const btnThemeToggle = document.getElementById("btn-theme-toggle");
+      const elThemeIcon = document.getElementById("theme-icon");
+      const elThemeLabel = document.getElementById("theme-label");
+      const btnMasterSync = document.getElementById("btn-activate-full-sync");
+
+      const elTimerDisplay = document.getElementById("timer-display");
+      const elTimerModeText = document.getElementById("timer-mode-text");
+      const elTimerRing = document.getElementById("timer-ring-circle");
+      const elCycleBadge = document.getElementById("pomo-cycle-badge");
+      const btnTimerStart = document.getElementById("btn-timer-start");
+      const btnTimerReset = document.getElementById("btn-timer-reset");
+      const inputCustomMin = document.getElementById("input-custom-min");
+      const btnCustomApply = document.getElementById("btn-custom-apply");
+      const btnOpenPip = document.getElementById("btn-open-pip");
+      const pipCanvas = document.getElementById("ff-pip-canvas");
+      const pipVideo = document.getElementById("ff-pip-video");
+      const pipCtx = pipCanvas.getContext("2d");
+
+      const elMetricUptime = document.getElementById("metric-uptime");
+      const elMetricPulses = document.getElementById("metric-pulses");
+      const elMetricNextPulse = document.getElementById("metric-next-pulse");
+      const elTelemetryVector = document.getElementById("telemetry-last-vector");
+      const btnCalibrateNow = document.getElementById("btn-calibrate-now");
+
+      const btnCopySnippet = document.getElementById("btn-copy-console-snippet");
+      const btnCopySourceSec = document.getElementById("btn-copy-source-secondary");
+      const elStepsBanner = document.getElementById("copy-steps-banner");
+      const elCopyHeading = document.getElementById("copy-banner-heading");
+      const elCopyStatusPill = document.getElementById("copy-status-pill");
+      const linkBookmarklet = document.getElementById("link-bookmarklet");
+      const preCoreBSource = document.getElementById("pre-core-b-source");
+
+      // Populate Core B Source & Bookmarklet
+      preCoreBSource.textContent = CORE_B_SCRIPT_SOURCE;
+      const minifiedForBookmarklet = CORE_B_SCRIPT_SOURCE
+        .replace(/\/\/.*$/gm, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      linkBookmarklet.setAttribute("href", "javascript:" + encodeURIComponent(minifiedForBookmarklet));
+
+      /* ==========================================================================
+       * 3. THEME SWITCHER (DARK / LIGHT)
+       * ========================================================================== */
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem("ff_workspace_theme", theme);
+        if (theme === "light") {
+          elThemeIcon.textContent = "☀️";
+          elThemeLabel.textContent = "淺色模式";
+        } else {
+          elThemeIcon.textContent = "🌙";
+          elThemeLabel.textContent = "深色模式";
+        }
+      }
+
+      const savedTheme = localStorage.getItem("ff_workspace_theme") || "dark";
+      applyTheme(savedTheme);
+
+      btnThemeToggle.addEventListener("click", function () {
+        const current = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+        applyTheme(current);
+      });
+
+      /* ==========================================================================
+       * 4. HARDWARE LOCKS: WAKE LOCK, 1HZ SILENT AUDIO CLOCK, PIP ENGINE
+       * ========================================================================== */
+      function refreshHardwarePills() {
+        const wakeActive = Boolean(hubState.wakeLockSentinel);
+        elPillWake.classList.toggle("active", wakeActive);
+        elStateWake.textContent = wakeActive ? "已鎖定" : "待機";
+
+        const pipOpen = Boolean(document.pictureInPictureElement);
+        hubState.pipActive = pipOpen;
+        elPillPip.classList.toggle("active", pipOpen);
+        elStatePip.textContent = pipOpen ? "運行中" : "待機";
+        btnOpenPip.textContent = pipOpen
+          ? "🖼️ 關閉浮動小窗模式 (Exit Floating PiP)"
+          : "🖼️ 開啟浮動小窗模式 (Mini Floating Timer / PiP)";
+
+        const audioRunning = Boolean(hubState.audioCtx && hubState.audioCtx.state === "running");
+        elPillAudio.classList.toggle("active", audioRunning);
+        elStateAudio.textContent = audioRunning ? "1Hz 運行中" : "待機";
+
+        if (wakeActive && audioRunning) {
+          btnMasterSync.classList.add("synced");
+          btnMasterSync.innerHTML = "<span>✓ 全時協同運行中 (Full Sync Active)</span>";
+        } else {
+          btnMasterSync.classList.remove("synced");
+          btnMasterSync.innerHTML = "<span>⚡ 一鍵啟動全時協同 (Activate Full Sync)</span>";
+        }
+      }
+
+      async function enableWakeLock() {
+        if (!("wakeLock" in navigator)) {
+          elStateWake.textContent = "不支援";
+          return false;
+        }
+        try {
+          if (!hubState.wakeLockSentinel) {
+            hubState.wakeLockSentinel = await navigator.wakeLock.request("screen");
+            hubState.wakeLockSentinel.addEventListener("release", function () {
+              hubState.wakeLockSentinel = null;
+              refreshHardwarePills();
+            });
+          }
+          refreshHardwarePills();
+          return true;
+        } catch (_) {
+          refreshHardwarePills();
+          return false;
+        }
+      }
+
+      async function toggleWakeLock() {
+        if (hubState.wakeLockSentinel) {
+          try {
+            await hubState.wakeLockSentinel.release();
+          } catch (_) {}
+          hubState.wakeLockSentinel = null;
+          refreshHardwarePills();
+        } else {
+          await enableWakeLock();
+        }
+      }
+
+      async function enableAudioClock() {
+        try {
+          const AudioCtor = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtor) return false;
+          if (!hubState.audioCtx) {
+            const ctx = new AudioCtor();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.value = 1; // 1Hz sub-audible clock reference
+            gain.gain.value = 0.00001; // Ultra-quiet gain
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            hubState.audioCtx = ctx;
+          }
+          if (hubState.audioCtx.state === "suspended") {
+            await hubState.audioCtx.resume();
+          }
+          refreshHardwarePills();
+          return true;
+        } catch (_) {
+          refreshHardwarePills();
+          return false;
+        }
+      }
+
+      async function toggleAudioClock() {
+        if (hubState.audioCtx && hubState.audioCtx.state === "running") {
+          try {
+            await hubState.audioCtx.suspend();
+          } catch (_) {}
+          refreshHardwarePills();
+        } else {
+          await enableAudioClock();
+        }
+      }
+
+      // Render 2 FPS Mini Dashboard on Canvas for Picture-in-Picture
+      function renderPipCanvas() {
+        const w = pipCanvas.width;
+        const h = pipCanvas.height;
+
+        // Background gradient
+        const grad = pipCtx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, "#0b1120");
+        grad.addColorStop(1, "#111827");
+        pipCtx.fillStyle = grad;
+        pipCtx.fillRect(0, 0, w, h);
+
+        // Border frame
+        pipCtx.strokeStyle = "rgba(99, 102, 241, 0.45)";
+        pipCtx.lineWidth = 2;
+        pipCtx.strokeRect(3, 3, w - 6, h - 6);
+
+        // Top Header Bar
+        pipCtx.fillStyle = "#9ca3af";
+        pipCtx.font = "600 12px -apple-system, BlinkMacSystemFont, sans-serif";
+        pipCtx.fillText("FocusFlow Workspace v2.4", 16, 26);
+
+        // Live Sync Status Badge
+        pipCtx.fillStyle = "rgba(16, 185, 129, 0.18)";
+        pipCtx.fillRect(w - 114, 11, 98, 22);
+        pipCtx.fillStyle = "#10b981";
+        pipCtx.font = "bold 11px monospace";
+        pipCtx.fillText("● SYNC ACTIVE", w - 106, 26);
+
+        // Main Countdown Digits
+        const mins = String(Math.floor(hubState.pomoRemainSec / 60)).padStart(2, "0");
+        const secs = String(hubState.pomoRemainSec % 60).padStart(2, "0");
+        pipCtx.fillStyle = "#f9fafb";
+        pipCtx.font = "800 54px monospace";
+        pipCtx.fillText(mins + ":" + secs, 16, 98);
+
+        // System Clock & Pulse metrics on right side
+        const now = new Date();
+        const sysClock = now.toTimeString().slice(0, 8);
+        pipCtx.fillStyle = "#a5b4fc";
+        pipCtx.font = "600 14px monospace";
+        pipCtx.fillText("🕒 " + sysClock, 210, 68);
+
+        pipCtx.fillStyle = "#6ee7b7";
+        pipCtx.font = "600 12px monospace";
+        pipCtx.fillText("Pulses: #" + hubState.pulseCount, 210, 92);
+        pipCtx.fillStyle = "#9ca3af";
+        pipCtx.fillText("Next: " + hubState.nextPulseInSec + "s", 210, 112);
+
+        // Mode Label
+        pipCtx.fillStyle = "#9ca3af";
+        pipCtx.font = "500 12px -apple-system, BlinkMacSystemFont, sans-serif";
+        pipCtx.fillText(hubState.pomoModeLabel, 16, 132);
+
+        // Animated Progress & Activity Pulse Bar
+        const barX = 16;
+        const barY = 152;
+        const barW = w - 32;
+        const barH = 12;
+
+        pipCtx.fillStyle = "rgba(255, 255, 255, 0.09)";
+        pipCtx.fillRect(barX, barY, barW, barH);
+
+        const ratio = hubState.pomoTotalSec > 0
+          ? Math.max(0.04, (hubState.pomoTotalSec - hubState.pomoRemainSec) / hubState.pomoTotalSec)
+          : 0.5;
+        const pulseWave = 0.5 + 0.5 * Math.sin(Date.now() / 400);
+        const barGrad = pipCtx.createLinearGradient(barX, 0, barX + barW, 0);
+        barGrad.addColorStop(0, "#6366f1");
+        barGrad.addColorStop(1, "#10b981");
+        pipCtx.fillStyle = barGrad;
+        pipCtx.fillRect(barX, barY, Math.round(barW * Math.max(ratio, 0.15 + 0.1 * pulseWave)), barH);
+
+        // Footer telemetry status
+        pipCtx.fillStyle = "#6b7280";
+        pipCtx.font = "11px monospace";
+        pipCtx.fillText("DISPLAY LOCK: " + (hubState.wakeLockSentinel ? "ON" : "STANDBY") + " | AUDIO 1Hz: " + (hubState.audioCtx && hubState.audioCtx.state === "running" ? "ON" : "STANDBY"), 16, 184);
+      }
+
+      let pipStreamInitialized = false;
+      async function ensurePipVideoStream() {
+        renderPipCanvas();
+        if (!pipStreamInitialized && typeof pipCanvas.captureStream === "function") {
+          const stream = pipCanvas.captureStream(2); // 2 FPS ultra-light stream
+          pipVideo.srcObject = stream;
+          pipStreamInitialized = true;
+        }
+        try {
+          await pipVideo.play();
+        } catch (_) {}
+      }
+
+      async function togglePictureInPicture() {
+        try {
+          if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+            refreshHardwarePills();
+            return;
+          }
+          await ensurePipVideoStream();
+          if (typeof pipVideo.requestPictureInPicture === "function") {
+            await pipVideo.requestPictureInPicture();
+          }
+          refreshHardwarePills();
+        } catch (err) {
+          elTelemetryVector.innerHTML = "<span>⚠️ 子母畫面啟動提示：請再次點擊按鈕或確認瀏覽器支援 Picture-in-Picture</span>";
+        }
+      }
+
+      pipVideo.addEventListener("enterpictureinpicture", refreshHardwarePills);
+      pipVideo.addEventListener("leavepictureinpicture", refreshHardwarePills);
+
+      elPillWake.addEventListener("click", toggleWakeLock);
+      elPillAudio.addEventListener("click", toggleAudioClock);
+      elPillPip.addEventListener("click", togglePictureInPicture);
+      btnOpenPip.addEventListener("click", togglePictureInPicture);
+
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible" && hubState.pomoRunning) {
+          enableWakeLock();
+        }
+      });
+
+      /* ==========================================================================
+       * 5. POMODORO FOCUS TIMER ENGINE
+       * ========================================================================== */
+      const RING_CIRCUMFERENCE = 2 * Math.PI * 95; // ~596.9
+
+      function updateTimerUI() {
+        const mins = String(Math.floor(hubState.pomoRemainSec / 60)).padStart(2, "0");
+        const secs = String(hubState.pomoRemainSec % 60).padStart(2, "0");
+        elTimerDisplay.textContent = mins + ":" + secs;
+        elTimerModeText.textContent = hubState.pomoModeLabel;
+        elCycleBadge.textContent = "循環 #" + hubState.pomoCycle;
+
+        const progress = hubState.pomoTotalSec > 0
+          ? (hubState.pomoTotalSec - hubState.pomoRemainSec) / hubState.pomoTotalSec
+          : 0;
+        const offset = RING_CIRCUMFERENCE * progress;
+        elTimerRing.style.strokeDashoffset = String(offset);
+
+        btnTimerStart.textContent = hubState.pomoRunning ? "⏸ 暫停計時" : "▶ 開始專注計時";
+        renderPipCanvas();
+      }
+
+      function startPomodoro() {
+        if (hubState.pomoRunning) return;
+        hubState.pomoRunning = true;
+        if (!document.title.startsWith("· ")) {
+          document.title = "· " + document.title;
+        }
+        clearInterval(hubState.pomoIntervalId);
+        hubState.pomoIntervalId = setInterval(function () {
+          if (hubState.pomoRemainSec > 0) {
+            hubState.pomoRemainSec -= 1;
+          } else {
+            hubState.pomoCycle += 1;
+            hubState.pomoRemainSec = hubState.pomoTotalSec;
+            triggerCalibrationPulse("番茄鐘週期完成自動校準");
+          }
+          updateTimerUI();
+        }, 1000);
+        updateTimerUI();
+      }
+
+      function pausePomodoro() {
+        hubState.pomoRunning = false;
+        clearInterval(hubState.pomoIntervalId);
+        updateTimerUI();
+      }
+
+      function resetPomodoro() {
+        pausePomodoro();
+        hubState.pomoRemainSec = hubState.pomoTotalSec;
+        updateTimerUI();
+      }
+
+      btnTimerStart.addEventListener("click", function () {
+        if (hubState.pomoRunning) {
+          pausePomodoro();
+        } else {
+          startPomodoro();
+          enableWakeLock();
+          enableAudioClock();
+        }
+      });
+
+      btnTimerReset.addEventListener("click", resetPomodoro);
+
+      document.querySelectorAll(".mode-tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          document.querySelectorAll(".mode-tab").forEach(function (t) { t.classList.remove("active"); });
+          tab.classList.add("active");
+          const mins = parseInt(tab.getAttribute("data-minutes"), 10) || 25;
+          const label = tab.getAttribute("data-label") || "專注衝刺";
+          inputCustomMin.value = String(mins);
+          hubState.pomoTotalSec = mins * 60;
+          hubState.pomoRemainSec = mins * 60;
+          hubState.pomoModeLabel = label;
+          updateTimerUI();
+        });
+      });
+
+      btnCustomApply.addEventListener("click", function () {
+        const val = Math.min(180, Math.max(1, parseInt(inputCustomMin.value, 10) || 25));
+        inputCustomMin.value = String(val);
+        hubState.pomoTotalSec = val * 60;
+        hubState.pomoRemainSec = val * 60;
+        hubState.pomoModeLabel = "自訂專注 (" + val + ":00 Custom)";
+        updateTimerUI();
+      });
+
+      /* ==========================================================================
+       * 6. PERSISTENT TASKS & QUICK MARKDOWN SCRATCHPAD (LOCALSTORAGE)
+       * ========================================================================== */
+      const TASKS_STORAGE_KEY = "ff_workspace_tasks";
+      const NOTES_STORAGE_KEY = "ff_workspace_notes";
+
+      const defaultTasks = [
+        { id: "t1", text: "啟動「⚡ 一鍵啟動全時協同」並開啟子母畫面浮動小窗 (PiP)", done: false },
+        { id: "t2", text: "複製右側 Console 協同腳本至目標工作分頁 (F12 -> Console)", done: false },
+        { id: "t3", text: "完成本階段 25 分鐘深度專注工作衝刺與系統文件檢視", done: true }
+      ];
+
+      let tasks = [];
+      try {
+        const raw = localStorage.getItem(TASKS_STORAGE_KEY);
+        tasks = raw ? JSON.parse(raw) : defaultTasks;
+      } catch (_) {
+        tasks = defaultTasks;
+      }
+
+      const elTaskList = document.getElementById("task-list-ul");
+      const elTaskStats = document.getElementById("task-stats-badge");
+      const inputNewTask = document.getElementById("input-new-task");
+      const btnAddTask = document.getElementById("btn-add-task");
+
+      function saveAndRenderTasks() {
+        try {
+          localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
+        } catch (_) {}
+
+        elTaskList.innerHTML = "";
+        let doneCount = 0;
+        tasks.forEach(function (item) {
+          if (item.done) doneCount += 1;
+          const li = document.createElement("li");
+          li.className = "task-item" + (item.done ? " completed" : "");
+
+          const left = document.createElement("label");
+          left.className = "task-left";
+
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.className = "task-checkbox";
+          cb.checked = Boolean(item.done);
+          cb.addEventListener("change", function () {
+            item.done = cb.checked;
+            saveAndRenderTasks();
+          });
+
+          const span = document.createElement("span");
+          span.className = "task-text";
+          span.textContent = item.text;
+
+          left.appendChild(cb);
+          left.appendChild(span);
+
+          const delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "task-del";
+          delBtn.title = "刪除此項目";
+          delBtn.textContent = "✕";
+          delBtn.addEventListener("click", function () {
+            tasks = tasks.filter(function (t) { return t.id !== item.id; });
+            saveAndRenderTasks();
+          });
+
+          li.appendChild(left);
+          li.appendChild(delBtn);
+          elTaskList.appendChild(li);
+        });
+
+        elTaskStats.textContent = doneCount + " / " + tasks.length + " 完成";
+      }
+
+      function addNewTask() {
+        const text = inputNewTask.value.trim();
+        if (!text) return;
+        tasks.unshift({
+          id: "task_" + Date.now(),
+          text: text,
+          done: false
+        });
+        inputNewTask.value = "";
+        saveAndRenderTasks();
+      }
+
+      btnAddTask.addEventListener("click", addNewTask);
+      inputNewTask.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") addNewTask();
+      });
+
+      saveAndRenderTasks();
+
+      // Quick Markdown Scratchpad
+      const elScratchpad = document.getElementById("textarea-scratchpad");
+      const elCharCount = document.getElementById("notes-char-count");
+      const elSaveBadge = document.getElementById("notes-save-badge");
+      const btnInsertTime = document.getElementById("btn-insert-time");
+
+      const defaultNotes = [
+        "# FocusFlow 工作區協同備忘錄",
+        "- [x] 啟用 1Hz 音訊時鐘與螢幕常亮鎖定 (Display Wake Lock)",
+        "- [x] 維持 VDI / 遠端工作階段視口連續性",
+        "",
+        "## 今日重點摘要",
+        "1. 透過子母畫面 (PiP) 將番茄鐘置頂於桌面角落，隨時掌握專注節奏。",
+        "2. 跨分頁診斷腳本支援常態分佈 (38s–115s) 校準脈衝。"
+      ].join("\n");
+
+      try {
+        const savedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
+        elScratchpad.value = savedNotes !== null ? savedNotes : defaultNotes;
+      } catch (_) {
+        elScratchpad.value = defaultNotes;
+      }
+
+      function updateNotesMetrics() {
+        const val = elScratchpad.value;
+        const lines = val.split("\n").length;
+        elCharCount.textContent = val.length + " 字元 | " + lines + " 行";
+      }
+
+      elScratchpad.addEventListener("input", function () {
+        updateNotesMetrics();
+        elSaveBadge.textContent = "⏳ 儲存中...";
+        try {
+          localStorage.setItem(NOTES_STORAGE_KEY, elScratchpad.value);
+        } catch (_) {}
+        setTimeout(function () {
+          elSaveBadge.textContent = "✓ 已自動儲存 (Saved)";
+        }, 250);
+      });
+
+      btnInsertTime.addEventListener("click", function () {
+        const nowStr = new Date().toLocaleTimeString("zh-TW", { hour12: false });
+        const stamp = "\n- [" + nowStr + "] ";
+        const start = elScratchpad.selectionStart || elScratchpad.value.length;
+        elScratchpad.value =
+          elScratchpad.value.slice(0, start) + stamp + elScratchpad.value.slice(start);
+        elScratchpad.dispatchEvent(new Event("input"));
+        elScratchpad.focus();
+      });
+
+      updateNotesMetrics();
+
+      /* ==========================================================================
+       * 7. TELEMETRY CALIBRATION PULSE ENGINE (BOX-MULLER 38s-115s NORMAL DIST)
+       * ========================================================================== */
+      function sampleGaussianSec() {
+        let u = 0, v = 0;
+        while (u === 0) u = Math.random();
+        while (v === 0) v = Math.random();
+        const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        return Math.min(115, Math.max(38, Math.round(72 + z * 16)));
+      }
+
+      function triggerCalibrationPulse(reasonLabel) {
+        const vw = Math.max(320, window.innerWidth || 1024);
+        const vh = Math.max(240, window.innerHeight || 768);
+        const tx = Math.round(vw * (0.22 + Math.random() * 0.56));
+        const ty = Math.round(vh * (0.22 + Math.random() * 0.56));
+
+        const targetEl = document.elementFromPoint(tx, ty) || document.body;
+        const evtInit = {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          clientX: tx,
+          clientY: ty,
+          pointerId: 1,
+          pointerType: "mouse",
+          isPrimary: true
+        };
+        if (typeof PointerEvent === "function") {
+          targetEl.dispatchEvent(new PointerEvent("pointermove", evtInit));
+        }
+        targetEl.dispatchEvent(new MouseEvent("mousemove", evtInit));
+        targetEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", code: "ShiftLeft", keyCode: 16, bubbles: true }));
+        targetEl.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift", code: "ShiftLeft", keyCode: 16, bubbles: true }));
+
+        hubState.lastCoord = { x: tx, y: ty };
+        hubState.pulseCount += 1;
+        hubState.nextPulseInSec = sampleGaussianSec();
+
+        const ts = new Date().toTimeString().slice(0, 8);
+        const tag = reasonLabel || "常態分佈自動校準";
+        elMetricPulses.textContent = String(hubState.pulseCount);
+        elMetricNextPulse.textContent = hubState.nextPulseInSec + "s";
+        elTelemetryVector.innerHTML =
+          "<span>⚡ [" + ts + "] 脈衝 #" + hubState.pulseCount + " (" + tag + ") → 座標 (" + tx + ", " + ty + ")</span>";
+
+        renderPipCanvas();
+      }
+
+      btnCalibrateNow.addEventListener("click", function () {
+        triggerCalibrationPulse("手動即時觸發");
+      });
+
+      // Master 1Hz System Ticker (updates Uptime, Next Pulse Countdown, and 2 FPS PiP Canvas)
+      setInterval(function () {
+        const elapsedSec = Math.floor((Date.now() - hubState.startedAt) / 1000);
+        const hrs = String(Math.floor(elapsedSec / 3600)).padStart(2, "0");
+        const mins = String(Math.floor((elapsedSec % 3600) / 60)).padStart(2, "0");
+        const secs = String(elapsedSec % 60).padStart(2, "0");
+        elMetricUptime.textContent = hrs + ":" + mins + ":" + secs;
+
+        if (hubState.nextPulseInSec > 1) {
+          hubState.nextPulseInSec -= 1;
+          elMetricNextPulse.textContent = hubState.nextPulseInSec + "s";
+        } else {
+          triggerCalibrationPulse("Box-Muller 週期校準");
+        }
+
+        renderPipCanvas();
+      }, 500);
+
+      // Initial calibration pulse on load
+      triggerCalibrationPulse("初始視口校準");
+
+      /* ==========================================================================
+       * 8. MASTER ONE-CLICK "ACTIVATE FULL SYNC" BUTTON
+       * ========================================================================== */
+      btnMasterSync.addEventListener("click", async function () {
+        await enableWakeLock();
+        await enableAudioClock();
+        startPomodoro();
+        triggerCalibrationPulse("全時協同主控啟動");
+        if (!document.pictureInPictureElement) {
+          await togglePictureInPicture();
+        }
+        refreshHardwarePills();
+      });
+
+      /* ==========================================================================
+       * 9. CLIPBOARD COPY UTILITY FOR CORE B CONSOLE SNIPPET
+       * ========================================================================== */
+      async function copyCoreBSnippet(triggerBtn) {
+        let copied = false;
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+          try {
+            await navigator.clipboard.writeText(CORE_B_SCRIPT_SOURCE);
+            copied = true;
+          } catch (_) {}
+        }
+        if (!copied) {
+          const tempArea = document.createElement("textarea");
+          tempArea.value = CORE_B_SCRIPT_SOURCE;
+          tempArea.style.position = "fixed";
+          tempArea.style.opacity = "0";
+          document.body.appendChild(tempArea);
+          tempArea.select();
+          try {
+            document.execCommand("copy");
+            copied = true;
+          } catch (_) {}
+          tempArea.remove();
+        }
+
+        const origText = triggerBtn.innerHTML;
+        triggerBtn.innerHTML = "✅ 已複製協同腳本！請切換分頁按 F12 貼上";
+        elCopyHeading.textContent = "✅ 協同腳本已複製到剪貼簿！請依序執行：";
+        elCopyStatusPill.textContent = "已複製 (Copied!)";
+        elStepsBanner.classList.add("flash");
+
+        setTimeout(function () {
+          triggerBtn.innerHTML = origText;
+          elStepsBanner.classList.remove("flash");
+        }, 3200);
+      }
+
+      btnCopySnippet.addEventListener("click", function () {
+        copyCoreBSnippet(btnCopySnippet);
+      });
+
+      btnCopySourceSec.addEventListener("click", function () {
+        copyCoreBSnippet(btnCopySourceSec);
+      });
+
+      // Initialize PiP Canvas on startup
+      ensurePipVideoStream();
+      refreshHardwarePills();
+    })();
+  </script>
+</body>
+</html>
